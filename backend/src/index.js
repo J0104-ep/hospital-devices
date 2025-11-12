@@ -12,11 +12,13 @@ const PORT = process.env.PORT || 4000;
 // 👇 Configuración CORS actualizada para permitir peticiones desde tu frontend en Render
 app.use(cors({
   origin: [
-    'https://hospital-devices-frontend.onrender.com', // ⚙️ dominio del frontend en Render
-    'http://localhost:3000' // para desarrollo local
+    'https://hospital-devices-1.onrender.com', // ✅ tu frontend real en Render
+    'https://hospital-devices.onrender.com',    // por si cambias dominio
+    'http://localhost:3000'                     // desarrollo local
   ],
   credentials: true,
 }));
+
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));

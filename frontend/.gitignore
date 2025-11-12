@@ -1,3 +1,9 @@
+<<<<<<< HEAD
+
+
+#Ignore vscode AI rules
+.github\instructions\codacy.instructions.md
+=======
 # See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
 
 # dependencies
@@ -21,3 +27,4 @@
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
+>>>>>>> 876dd7b (Frontend listo para despliegue)

@@ -1,0 +1,57 @@
+.form-container {
+  background: #fff;
+  padding: 20px;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.form-group {
+  margin-bottom: 15px;
+}
+
+.form-group label {
+  font-weight: 600;
+  display: block;
+  margin-bottom: 5px;
+}
+
+/* 🖼️ GRID DE EQUIPOS */
+.equipment-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  gap: 15px;
+  margin-top: 10px;
+}
+
+.equipment-card {
+  border: 2px solid #ccc;
+  border-radius: 10px;
+  padding: 10px;
+  text-align: center;
+  cursor: pointer;
+  transition: 0.25s;
+  background: #fff;
+}
+
+.equipment-card:hover {
+  border-color: #007bff;
+  transform: scale(1.03);
+}
+
+.equipment-card.selected {
+  border-color: #007bff;
+  background: #e7f1ff;
+}
+
+.equipment-image {
+  width: 100%;
+  height: 120px;
+  object-fit: cover;
+  border-radius: 8px;
+}
+
+.equipment-name {
+  font-weight: 600;
+  margin-top: 8px;
+  font-size: 14px;
+}

@@ -1,23 +1,23 @@
 import React, { useState } from 'react';
 import GoogleLoginButton from '../components/GoogleLoginButton';
+import { API_BASE_URL } from '../config'; // ✅ Usa la URL dinámica del backend
 
 export default function LoginPage({ onLogin }) {
   const [isRegister, setIsRegister] = useState(false);
   const [formData, setFormData] = useState({
+    name: '',
     email: '',
-    password: '',
-    name: ''
+    password: ''
   });
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
 
+  // ✅ Manejo de cambios en los inputs
   const handleChange = (e) => {
-    setFormData({
-      ...formData,
-      [e.target.name]: e.target.value
-    });
+    setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
+  // ✅ Envío de formulario
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
@@ -25,40 +25,41 @@ export default function LoginPage({ onLogin }) {
 
     try {
       const endpoint = isRegister ? '/auth/register' : '/auth/login';
-      const body = isRegister 
-        ? { email: formData.email, password: formData.password, name: formData.name }
-        : { email: formData.email, password: formData.password };
+      const body = isRegister
+        ? {
+            name: formData.name,
+            email: formData.email,
+            password: formData.password,
+          }
+        : {
+            email: formData.email,
+            password: formData.password,
+          };
 
-      const res = await fetch(`http://localhost:4000/api${endpoint}`, {
+      console.log(`🌍 Conectando a: ${API_BASE_URL}${endpoint}`);
+
+      const res = await fetch(`${API_BASE_URL}${endpoint}`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(body)
+        body: JSON.stringify(body),
       });
 
-      // Verificar si la respuesta es JSON
-      const contentType = res.headers.get('content-type');
-      if (!contentType || !contentType.includes('application/json')) {
-        throw new Error('El servidor no está respondiendo correctamente. Verifica que el backend esté corriendo en http://localhost:4000');
+      if (!res.ok) {
+        const data = await res.json();
+        throw new Error(data.error || 'Error en la autenticación.');
       }
 
       const data = await res.json();
 
-      if (!res.ok) {
-        // Mensajes más específicos
-        if (res.status === 401 && !isRegister) {
-          throw new Error('Usuario no encontrado. Por favor regístrate primero.');
-        }
-        throw new Error(data.error || 'Error en la autenticación');
-      }
-
-      // Guardar token y usuario
+      // ✅ Guarda el token y usuario en localStorage
       localStorage.setItem('token', data.token);
       localStorage.setItem('user', JSON.stringify(data.user));
       onLogin(data.user);
 
     } catch (err) {
+      console.error('❌ Error:', err.message);
       if (err.message.includes('Failed to fetch')) {
-        setError('No se puede conectar al servidor. Verifica que el backend esté corriendo.');
+        setError('No se pudo conectar al servidor. Verifica que el backend esté activo.');
       } else {
         setError(err.message);
       }
@@ -71,7 +72,7 @@ export default function LoginPage({ onLogin }) {
     <div style={styles.container}>
       <div style={styles.card}>
         <h2>{isRegister ? 'Crear cuenta' : 'Iniciar sesión'}</h2>
-        
+
         {error && <div style={styles.error}>{error}</div>}
 
         <form onSubmit={handleSubmit} style={styles.form}>
@@ -84,24 +85,24 @@ export default function LoginPage({ onLogin }) {
                 name="name"
                 value={formData.name}
                 onChange={handleChange}
+                placeholder="Tu nombre"
                 required
                 style={styles.input}
-                placeholder="Tu nombre"
               />
             </div>
           )}
 
           <div style={styles.formGroup}>
-            <label htmlFor="email">Email</label>
+            <label htmlFor="email">Correo electrónico</label>
             <input
               id="email"
               type="email"
               name="email"
               value={formData.email}
               onChange={handleChange}
+              placeholder="tu@email.com"
               required
               style={styles.input}
-              placeholder="tu@email.com"
             />
           </div>
 
@@ -113,25 +114,23 @@ export default function LoginPage({ onLogin }) {
               name="password"
               value={formData.password}
               onChange={handleChange}
-              required
-              style={styles.input}
               placeholder="••••••••"
-              minLength="6"
+              required
+              minLength={6}
+              style={styles.input}
             />
           </div>
 
-          <button 
-            type="submit" 
+          <button
+            type="submit"
             style={styles.submitButton}
             disabled={loading}
           >
-            {loading ? 'Procesando...' : (isRegister ? 'Registrarse' : 'Iniciar sesión')}
+            {loading ? 'Procesando...' : isRegister ? 'Registrarse' : 'Iniciar sesión'}
           </button>
         </form>
 
-        <div style={styles.divider}>
-          <span>O</span>
-        </div>
+        <div style={styles.divider}><span>O</span></div>
 
         <GoogleLoginButton onLoginSuccess={onLogin} />
 
@@ -139,8 +138,9 @@ export default function LoginPage({ onLogin }) {
           {isRegister ? (
             <p>
               ¿Ya tienes cuenta?{' '}
-              <button 
-                onClick={() => setIsRegister(false)} 
+              <button
+                type="button"
+                onClick={() => setIsRegister(false)}
                 style={styles.linkButton}
               >
                 Inicia sesión
@@ -149,8 +149,9 @@ export default function LoginPage({ onLogin }) {
           ) : (
             <p>
               ¿No tienes cuenta?{' '}
-              <button 
-                onClick={() => setIsRegister(true)} 
+              <button
+                type="button"
+                onClick={() => setIsRegister(true)}
                 style={styles.linkButton}
               >
                 Regístrate
@@ -169,60 +170,56 @@ const styles = {
     justifyContent: 'center',
     alignItems: 'center',
     minHeight: '80vh',
-    padding: '20px'
+    backgroundColor: '#f5f6fa',
+    padding: '20px',
   },
   card: {
-    backgroundColor: 'white',
+    backgroundColor: '#fff',
     padding: '40px',
-    borderRadius: '8px',
-    boxShadow: '0 2px 10px rgba(0,0,0,0.1)',
+    borderRadius: '10px',
+    boxShadow: '0 4px 12px rgba(0,0,0,0.1)',
     maxWidth: '400px',
-    width: '100%'
+    width: '100%',
   },
-  form: {
-    marginTop: '20px'
-  },
-  formGroup: {
-    marginBottom: '15px'
-  },
+  form: { marginTop: '20px' },
+  formGroup: { marginBottom: '15px' },
   input: {
     width: '100%',
     padding: '10px',
-    fontSize: '14px',
     border: '1px solid #ddd',
-    borderRadius: '4px',
-    boxSizing: 'border-box',
-    marginTop: '5px'
+    borderRadius: '6px',
+    fontSize: '14px',
+    marginTop: '5px',
   },
   submitButton: {
     width: '100%',
     padding: '12px',
     backgroundColor: '#1a73e8',
-    color: 'white',
+    color: '#fff',
     border: 'none',
-    borderRadius: '4px',
-    fontSize: '16px',
+    borderRadius: '6px',
     cursor: 'pointer',
-    marginTop: '10px'
+    fontSize: '16px',
+    marginTop: '10px',
   },
   error: {
     backgroundColor: '#fee',
     color: '#c33',
     padding: '10px',
-    borderRadius: '4px',
+    borderRadius: '6px',
     marginBottom: '15px',
-    fontSize: '14px'
+    fontSize: '14px',
   },
   divider: {
     textAlign: 'center',
     margin: '20px 0',
-    position: 'relative',
-    color: '#666'
+    color: '#888',
+    fontWeight: 'bold',
   },
   toggle: {
     textAlign: 'center',
-    marginTop: '20px',
-    fontSize: '14px'
+    marginTop: '15px',
+    fontSize: '14px',
   },
   linkButton: {
     background: 'none',
@@ -230,6 +227,6 @@ const styles = {
     color: '#1a73e8',
     cursor: 'pointer',
     textDecoration: 'underline',
-    fontSize: '14px'
-  }
+    fontSize: '14px',
+  },
 };

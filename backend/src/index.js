@@ -9,7 +9,15 @@ const app = express();
 const PORT = process.env.PORT || 4000;
 
 // === MIDDLEWARES ===
-app.use(cors({ origin: 'http://localhost:3000', credentials: true }));
+// 👇 Configuración CORS actualizada para permitir peticiones desde tu frontend en Render
+app.use(cors({
+  origin: [
+    'https://hospital-devices-frontend.onrender.com', // ⚙️ dominio del frontend en Render
+    'http://localhost:3000' // para desarrollo local
+  ],
+  credentials: true,
+}));
+
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
@@ -55,7 +63,7 @@ app.get('/', (req, res) => {
 
 // === SERVER START ===
 app.listen(PORT, async () => {
-  console.log(`✅ Server running on http://localhost:${PORT}`);
+  console.log(`✅ Server running on port ${PORT}`);
   try {
     await sequelize.authenticate();
     console.log('✅ DB connected successfully');
